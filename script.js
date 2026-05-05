@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const fileUpload = document.getElementById('file-upload');
     const markdownViewer = document.getElementById('markdown-viewer');
+    const documentControls = document.getElementById('document-controls');
+    const increaseFontBtn = document.getElementById('increase-font-btn');
+    const decreaseFontBtn = document.getElementById('decrease-font-btn');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
     const themeToggle = document.getElementById('theme-toggle');
     const sunIcon = document.querySelector('.sun-icon');
     const moonIcon = document.querySelector('.moon-icon');
@@ -81,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dropZone.classList.remove('active');
         setTimeout(() => {
             markdownViewer.style.display = 'block';
+            if (documentControls) documentControls.style.display = 'flex';
         }, 300);
     };
 
@@ -212,4 +217,50 @@ document.addEventListener('DOMContentLoaded', () => {
             processFile(this.files[0]);
         }
     });
+
+    // Font Size Logic
+    let currentFontSize = 16;
+    if (markdownViewer) {
+        markdownViewer.style.fontSize = `${currentFontSize}px`;
+    }
+
+    if (increaseFontBtn) {
+        increaseFontBtn.addEventListener('click', () => {
+            if (currentFontSize < 32) {
+                currentFontSize += 2;
+                markdownViewer.style.fontSize = `${currentFontSize}px`;
+            }
+        });
+    }
+
+    if (decreaseFontBtn) {
+        decreaseFontBtn.addEventListener('click', () => {
+            if (currentFontSize > 8) {
+                currentFontSize -= 2;
+                markdownViewer.style.fontSize = `${currentFontSize}px`;
+            }
+        });
+    }
+
+    // PDF Export Logic
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', () => {
+            // Temporarily set document title to the loaded file name 
+            // so the print dialog uses it as the default PDF name
+            const originalTitle = document.title;
+            try {
+                const recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+                if (recentFiles.length > 0) {
+                    const name = recentFiles[0].name.replace(/\.[^/.]+$/, "");
+                    document.title = name;
+                }
+            } catch (e) {}
+
+            // Trigger native browser print dialog for selectable text PDFs
+            window.print();
+
+            // Restore original title
+            document.title = originalTitle;
+        });
+    }
 });
